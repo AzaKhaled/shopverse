@@ -1,105 +1,175 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:shopverse/core/di/injections.dart';
+import 'package:flutter/cupertino.dart';
 
 class DioHelper {
-  static Dio get dio => sl<Dio>();
+  static final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: 'https://store.mansouracademy.com/api/v1/', // Base URL + v1
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      // sendTimeout: const Duration(seconds: 30),
+    ),
+  );
 
-  static Future<Either<String, Response>> getData({
-    required String url,
-    Map<String, dynamic>? query,
+  // =================== GET ===================
+  static Future<Either<String, Map<String, dynamic>>> get({
+    required String path,
+    Map<String, dynamic>? params,
+    String? search,
     String? token,
   }) async {
     try {
-      final Response response = await dio.get(
-        url,
-        queryParameters: query,
+      Response response = await _dio.get(
+        path,
+        queryParameters: {
+          if (search != null) 'q': search,
+          ...?params,
+        },
         options: Options(
           headers: {
-            'Content-Type': 'application/json',
-            if (token != null) 'Authorization': 'Bearer $token',
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
           },
         ),
       );
-      return Right(response);
-    } on DioException catch (error) {
-      dynamic data = error.response?.data;
-      String message = 'Something went wrong, please try again later.';
 
-      if (data is Map && data.containsKey('message')) {
-        message = data['message'];
-      } else if (data is List && data.isNotEmpty) {
-        message = data.first.toString();
-      } else if (data is String) {
-        message = data;
+      return Right(response.data);
+    } on DioException catch (e) {
+      debugPrint('DioHelper.get DioException: ${e.response?.data}');
+      if (e.response != null && e.response!.data['message'] != null) {
+        return Left(e.response!.data['message']);
       }
-
-      return Left(message);
+      return Left('Something went wrong, please try again later');
+    } catch (e) {
+      debugPrint('DioHelper.get error: $e');
+      return Left('Something went wrong, please try again later');
     }
   }
 
-  static Future<Either<String, Response>> postData({
-    required String url,
-    required dynamic data,
+  // =================== POST ===================
+  static Future<Either<String, Map<String, dynamic>>> post({
+    required String path,
+    Map<String, dynamic>? data,
     String? token,
   }) async {
     try {
-      debugPrint('📤 Sending Data: $data');
-
-      final Response response = await dio.post(
-        url,
+      Response response = await _dio.post(
+        path,
         data: data,
         options: Options(
           headers: {
-            'Content-Type': 'application/json',
-            if (token != null) 'Authorization': 'Bearer $token',
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
           },
         ),
       );
 
-      return Right(response);
-    } on DioException catch (error) {
-      String message = 'Something went wrong, please try again later.';
-      debugPrint('❌ DioException Type: ${error.type}');
-      debugPrint('❌ DioException Response: ${error.response?.data}');
-      debugPrint('❌ DioException StatusCode: ${error.response?.statusCode}');
-      debugPrint('🧩 Full Dio Error Data: ${error.response?.data}');
-     debugPrint('🧩 Full Dio Error Headers: ${error.response?.headers}');
-
-      if (error.response?.data is Map) {
-        final data = error.response?.data;
-
-        // ✅ لو فيه errors جايه من الـ API
-        if (data['errors'] != null && data['errors'] is Map) {
-          final errors = data['errors'] as Map;
-
-          // نحاول ناخد أول قيمة في الـ Map (عادةً بتكون List)
-          if (errors.isNotEmpty) {
-            final firstKey = errors.keys.first;
-            final value = errors[firstKey];
-
-            if (value is List && value.isNotEmpty) {
-              message = value.first.toString();
-            } else if (value is String) {
-              message = value;
-            }
-          }
-        }
-        // ✅ fallback لو مفيش errors لكن فيه message
-        else if (data['message'] != null) {
-          message = data['message'];
-        }
-      } else if (error.response?.data is String) {
-        message = error.response?.data;
+      return Right(response.data);
+    } on DioException catch (e) {
+      debugPrint('DioHelper.post DioException: ${e.response?.data}');
+      if (e.response != null && e.response!.data['message'] != null) {
+        return Left(e.response!.data['message']);
       }
-
-      debugPrint('❌ Dio Error: $message');
-      debugPrint('🧩 Full Dio Error Data: ${error.response?.data}');
-      return Left(message);
+      return Left('Something went wrong, please try again later');
     } catch (e) {
-      debugPrint('💥 DioHelper.post error: $e');
-      return const Left('Something went wrong, please try again later.');
+      debugPrint('DioHelper.post error: $e');
+      return Left('Something went wrong, please try again later');
+    }
+  }
+
+  // =================== PUT ===================
+  static Future<Either<String, Map<String, dynamic>>> put({
+    required String path,
+    Map<String, dynamic>? data,
+    String? token,
+  }) async {
+    try {
+      Response response = await _dio.put(
+        path,
+        data: data,
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return Right(response.data);
+    } on DioException catch (e) {
+      debugPrint('DioHelper.put DioException: ${e.response?.data}');
+      if (e.response != null && e.response!.data['message'] != null) {
+        return Left(e.response!.data['message']);
+      }
+      return Left('Something went wrong, please try again later');
+    } catch (e) {
+      debugPrint('DioHelper.put error: $e');
+      return Left('Something went wrong, please try again later');
+    }
+  }
+
+  // =================== PATCH ===================
+  static Future<Either<String, Map<String, dynamic>>> patch({
+    required String path,
+    Map<String, dynamic>? params,
+    String? search,
+    String? token,
+  }) async {
+    try {
+      Response response = await _dio.patch(
+        path,
+        queryParameters: {
+          if (search != null) 'q': search,
+          ...?params,
+        },
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return Right(response.data);
+    } on DioException catch (e) {
+      debugPrint('DioHelper.patch DioException: ${e.response?.data}');
+      if (e.response != null && e.response!.data['message'] != null) {
+        return Left(e.response!.data['message']);
+      }
+      return Left('Something went wrong, please try again later');
+    } catch (e) {
+      debugPrint('DioHelper.patch error: $e');
+      return Left('Something went wrong, please try again later');
+    }
+  }
+
+  // =================== DELETE ===================
+  static Future<Either<String, Map<String, dynamic>>> delete({
+    required String path,
+    String? token,
+  }) async {
+    try {
+      Response response = await _dio.delete(
+        path,
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return Right(response.data);
+    } on DioException catch (e) {
+      debugPrint('DioHelper.delete DioException: ${e.response?.data}');
+      if (e.response != null && e.response!.data['message'] != null) {
+        return Left(e.response!.data['message']);
+      }
+      return Left('Something went wrong, please try again later');
+    } catch (e) {
+      debugPrint('DioHelper.delete error: $e');
+      return Left('Something went wrong, please try again later');
     }
   }
 }
