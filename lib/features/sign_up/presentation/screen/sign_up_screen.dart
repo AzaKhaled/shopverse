@@ -1,115 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shopverse/core/theme/colors.dart';
-import 'package:shopverse/core/theme/text_styles.dart';
-import 'package:shopverse/core/utils/constants/primary/primary_app_bar.dart';
-import 'package:shopverse/core/utils/constants/primary/primary_button.dart';
-import 'package:shopverse/core/utils/constants/routes.dart';
-import 'package:shopverse/core/utils/constants/spacing.dart';
-import 'package:shopverse/core/utils/cubit/home_cubit.dart';
-import 'package:shopverse/core/utils/cubit/home_state.dart';
-import 'package:shopverse/core/utils/extensions/context_extension.dart';
+import 'package:shopverse/core/util/constants/primary/primary_button.dart';
+import 'package:shopverse/core/util/constants/routes.dart';
+import 'package:shopverse/core/util/constants/spacing.dart';
+import 'package:shopverse/core/util/cubit/home_cubit.dart';
+import 'package:shopverse/core/util/cubit/home_states.dart';
+import 'package:shopverse/core/util/extensions/context_extension.dart';
 import 'package:shopverse/features/sign_up/presentation/widget/sign_up_fields_section.dart';
-import 'package:shopverse/features/sign_up/presentation/widget/sign_up_social_buttons.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final formKey = GlobalKey<FormState>();
-
-  SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<HomeCubit, HomeState>(
-      listener: (BuildContext context, HomeState state) {
-        if (state is HomeSignupSuccessState) {
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text(state.userModel.message)),
-          // );
+    final homeCubit = context.read<HomeCubit>();
 
-          context.pushReplacement<String>(
-            Routes.verifyEmailRoute,
-            arguments: homeCubit.signUpEmailController.text,
-          );
-          homeCubit.firstNameController.clear();
-          homeCubit.lastNameController.clear();
-          homeCubit.signUpPasswordController.clear();
-        }
-        if (state is HomeSignupErrorState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
-          );
-        }
-      },
-      buildWhen: (previous, current) =>
-          current is HomeSignupSuccessState ||
-          current is HomeSignupErrorState ||
-          current is HomeSignupLoadingState,
-      builder: (BuildContext context, HomeState state) {
-        return Scaffold(
-          appBar: const PrimaryAppBar(),
-          body: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
+    return Scaffold(
+      
+      body: SafeArea(
+        child: BlocConsumer<HomeCubit, HomeStates>(
+          listenWhen: (previous, current) =>
+              current is RegisterSuccessState || current is RegisterErrorState,
+          listener: (context, state) {
+            if (state is RegisterSuccessState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Account Created Successfully! 🎉"),
+                ),
+              );
+
+            context.pushReplacement(Routes.homeScreen);
+
+            }
+
+            if (state is RegisterErrorState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.error),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    verticalSpace20,
-                    Text('Sign Up', style: TextStylesManager.semibold30),
-                    verticalSpace40,
+                    const Text(
+                      "Register",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    verticalSpace10,
+
+                    const Text(
+                      "Create your new account to start shopping!",
+                      style: TextStyle(fontSize: 15, color: Colors.grey),
+                    ),
+
+                    verticalSpace30,
+
                     const SignUpFieldsSection(),
-                    verticalSpace20,
+
+                    verticalSpace30,
+
                     PrimaryButton(
-                      padding: 0,
-                      label: Text('Sign Up', style: TextStylesManager.bold16),
+                      text: "Sign Up",
+                      isLoading: state is RegisterLoadingState,
                       onPressed: () {
                         if (formKey.currentState!.validate()) {
-                          homeCubit.signUp();
+                          homeCubit.registerUser();
                         }
                       },
                     ),
+
                     verticalSpace20,
-                    Row(
-                      spacing: 15,
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            color: Colors.grey.withValues(alpha: 0.5),
-                            thickness: 1.15,
-                          ),
-                        ),
-                        const Text('Or'),
-                        Expanded(
-                          child: Divider(
-                            color: Colors.grey.withValues(alpha: 0.5),
-                            thickness: 1.15,
-                          ),
-                        ),
-                      ],
-                    ),
-                    verticalSpace20,
-                    const SignUpSocialButtons(),
-                    verticalSpace20,
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          'Already have an account?',
-                          style: TextStylesManager.regular14.copyWith(
-                            color: ColorsManager.primaryColor,
-                          ),
-                        ),
+                        const Text("Already have an account?"),
                         TextButton(
-                          style: TextButton.styleFrom(padding: EdgeInsets.zero),
                           onPressed: () {
-                            context.push<Widget>(Routes.loginRoute);
+                            Navigator.pop(context);
                           },
-                          child: Text(
-                            'Login',
-                            style: TextStylesManager.regular14.copyWith(
-                              color: ColorsManager.primaryColor,
-                            ),
+                          child:  Text(
+                            "Login",
+                            
+                            style: TextStyle(fontWeight: FontWeight.bold ,  color: ColorsManager.primaryColor,),
                           ),
                         ),
                       ],
@@ -117,10 +110,10 @@ class SignUpScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
-}
+} 

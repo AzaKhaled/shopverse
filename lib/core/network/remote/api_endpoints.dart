@@ -1,32 +1,17 @@
-// 🌍 Base URL
-const String baseUrl = 'https://accessories-eshop.runasp.net/api/';
+const String baseUrl = 'https://store.mansouracademy.com/api/';
+const String apiVersion = 'v1/';
 
-// 🔐 Auth Endpoints
-const String signUpApi = 'auth/register';
-const String loginApi = 'auth/login';
-const String verifyEmailApi = 'auth/verify-email';
-const String resendOtpApi = 'auth/resend-otp';
-const String forgotPasswordApi = 'auth/forgot-password';
-const String validateOtpApi = 'auth/validate-otp';
-const String resetPasswordApi = 'auth/reset-password';
-const String changePasswordApi = 'auth/change-password';
-const String logoutApi = 'auth/logout';
-const String refreshTokenApi = 'auth/refresh-token';
-const String meApi = 'auth/me';
+const String categoriesEndpoint = 'categories';
+const String bannersEndpoint = 'banners';
+const String productsEndpoint = 'categories/';
+const String productDetailsEndpoint = 'products/';
+const String brandsEndpoint = 'brands';
+const String registerEndpoint = 'auth/register';
+const String loginEndpoint = 'auth/login';
+const String addressesEndpoint = 'addresses';
+const String ordersEndpoint = 'orders';
+const String setDefaultAddressEndpoint = 'addresses/ADDRESS_ID/set-default';
 
-// 🔹 Google Auth
-const String googleLoginApi = 'auth/google/login';
-const String googleCallbackApi = 'auth/google/callback';
-const String googleMobileApi = 'auth/google/mobile';
 
-// 🌎 Public Endpoints
-const String countriesApi = 'public/countries';
-const String locationsApi = 'public/register_locations';
-
-// 🛍 Categories
-const String getAllCategoriesApi = 'categories';
-const String getCategoryByIdApi = 'categories/'; // + categoryId
-
-// 🛒 Products
-const String getAllProductsApi = 'products';
-const String getProductByIdApi = 'products/'; // + productId
+const String getCartEndpoint = 'cart';
+const String updateCartQuantityEndpoint = 'cart/items/ITEM_ID';

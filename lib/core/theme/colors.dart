@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
 class ColorsManager {
-  static const Color primaryColor = Color(0xFF454545);
-  static const Color scaffoldColor = Color(0xFFF8F8F8);
-  static const Color secondaryColor = Color(0xFFEDEDED);
-  static const Color tertiary = Color(0xFF3B82F6);
-  static const Color textColor = Color(0xFF000000);
-  static const Color subtitleColor = Color(0xFF7F7F7F);
-  static const Color strokeColor = Color(0xFFD7D7D7);
-  static const Color shadesColor = whiteColor;
-  static const Color buttonColor = Color(0xFF21292B);
-  static const Color iconColor = Color(0xFF767676);
-  static const Color background = Color(0xFFF8F8F8);
+  static const Color primaryColor = Color(0xFF009688);
+  static Color get primaryColor2 => Color(0xFF009688);
+  static const Color primaryDarkColor = Color(0xFF000000);
+  static const Color scaffoldBackgroundColor = Color(0xFFF5F5F5);
+  static const Color scaffoldDarkBackgroundColor = Color(0xFF2F302E);
+
   static const Color whiteColor = Color(0xFFFFFFFF);
   static const Color blackColor = Color(0xFF000000);
+  static const Color greyColor = Color(0xFFB0BEC5);
+  static const Color darkGreyColor = Color(0xFF546E7A);
+  static const Color lightGreyColor = Color(0xFFCFD8DC);
+  static const Color errorColor = Color(0xFFD32F2F);
+  static const Color transparent = Color(0x00000000);
+  static Color get textColor => Color(0xFF2F302E);
 }

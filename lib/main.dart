@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shopverse/core/di/injections.dart';
 import 'package:shopverse/core/theme/theme.dart';
-import 'package:shopverse/core/utils/constants/my_bloc_observer.dart';
-import 'package:shopverse/core/utils/constants/responsive_size.dart';
-import 'package:shopverse/core/utils/constants/routes.dart';
-import 'package:shopverse/core/utils/cubit/home_cubit.dart';
-import 'package:shopverse/core/utils/cubit/home_state.dart';
+import 'package:shopverse/core/util/constants/bloc_observer.dart';
+import 'package:shopverse/core/util/constants/routes.dart';
+import 'package:shopverse/core/util/cubit/home_cubit.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -24,8 +23,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => sl<HomeCubit>(),
-      child: BlocBuilder<HomeCubit, HomeState>(
-        builder: (BuildContext context, HomeState state) {
+      child: ScreenUtilInit(
+        designSize: const Size(375, 812), // حجم تصميم Figma
+        minTextAdapt: true,
+        builder: (context, child) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             navigatorKey: navigatorKey,
@@ -33,13 +34,11 @@ class MyApp extends StatelessWidget {
             darkTheme: ThemesManager.darkTheme,
             themeMode: ThemeMode.system,
             routes: Routes.routes,
-            initialRoute: Routes.loginRoute,
-            builder: (context, child) {
-              ScreenSizes.init(context);
-              return child!;
-            },
+            initialRoute: Routes.loginScreen,
+            home: child,
           );
         },
+        child: const SizedBox(), // ممكن تحطي LoginScreen مباشرة لو تحبي
       ),
     );
   }

@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shopverse/core/theme/colors.dart';
 import 'package:shopverse/core/theme/text_styles.dart';
-import 'package:shopverse/core/utils/constants/primary/primary_app_bar.dart';
-import 'package:shopverse/core/utils/constants/routes.dart';
-import 'package:shopverse/core/utils/constants/spacing.dart';
-import 'package:shopverse/core/utils/cubit/home_cubit.dart';
-import 'package:shopverse/core/utils/cubit/home_state.dart';
-import 'package:shopverse/core/utils/extensions/context_extension.dart';
-import 'package:shopverse/features/login/presentation/widget/login_auth_buttons.dart';
+import 'package:shopverse/core/util/constants/primary/primary_button.dart';
+import 'package:shopverse/core/util/constants/routes.dart';
+import 'package:shopverse/core/util/constants/spacing.dart';
+import 'package:shopverse/core/util/cubit/home_cubit.dart';
+import 'package:shopverse/core/util/cubit/home_states.dart';
+import 'package:shopverse/core/util/extensions/context_extension.dart';
 import 'package:shopverse/features/login/presentation/widget/login_fields_section.dart';
-import 'package:shopverse/features/login/presentation/widget/login_social_buttons.dart';
 
 class LoginScreen extends StatelessWidget {
   final formKey = GlobalKey<FormState>();
@@ -19,104 +17,87 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<HomeCubit, HomeState>(
+    final homeCubit = context.read<HomeCubit>();
+
+    return BlocConsumer<HomeCubit, HomeStates>(
       buildWhen: (previous, current) =>
-          current is HomeTogglePasswordVisibilityState ||
-          current is HomeToggleRememberMeState ||
-          current is HomeLoginLoadingState ||
-          current is HomeLoginSuccessState ||
-          current is HomeLoginErrorState,
-      listener: (BuildContext context, HomeState state) {
-        if (state is HomeLoginSuccessState) {
+          
+          current is LoginUserLoadingState ||
+          current is LoginUserSuccessState ||
+          current is LoginUserErrorState,
+      listener: (context, state) {
+        if (state is LoginUserSuccessState) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Login Successful! Welcome.')),
           );
-          context.pushReplacement<Widget>(Routes.homeRoute);
+          context.pushReplacement(Routes.homeScreen);
         }
 
-        if (state is HomeLoginErrorState) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.error)));
-        }
-
-        // ✅ الحالة الخاصة بفورجت باسورد
-        if (state is ForgotPasswordSuccessState) {
-          final email = context
-              .read<HomeCubit>()
-              .loginEmailController
-              .text
-              .trim();
-
+        if (state is LoginUserErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('OTP sent successfully')),
-          );
-
-          context.push<String>(Routes.resetPasswordRoute, arguments: email);
-        }
-
-        if (state is ForgotPasswordErrorState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(backgroundColor: Colors.red, content: Text(state.error)),
+            SnackBar(content: Text(state.error)),
           );
         }
       },
-
-      builder: (BuildContext context, HomeState state) {
+      builder: (context, state) {
         return SafeArea(
           child: Scaffold(
-            appBar: const PrimaryAppBar(),
+            // appBar: const PrimaryAppBar(),
             body: SingleChildScrollView(
-              child: Form(
-                key: formKey,
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       verticalSpace20,
-                      Text('ShopVerse', style: TextStylesManager.semibold30),
+                      Text('ShopVerse', style: TextStylesManager.bold10),
                       verticalSpace40,
                       const LoginFieldsSection(),
                       verticalSpace20,
-                      LoginAuthButtons(formKey: formKey),
+                      PrimaryButton(
+                        isLoading: state is LoginUserLoadingState,
+                        text: 'Login',
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            homeCubit.loginUser();
+                          }
+                        },
+                      ),
                       verticalSpace20,
                       Row(
-                        spacing: 15,
                         children: [
                           Expanded(
                             child: Divider(
-                              color: Colors.grey.withValues(alpha: 0.5),
+                              color: Colors.grey.withOpacity(0.5),
                               thickness: 1.15,
                             ),
                           ),
-                          const Text('Or'),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text('Or'),
+                          ),
                           Expanded(
                             child: Divider(
-                              color: Colors.grey.withValues(alpha: 0.5),
+                              color: Colors.grey.withOpacity(0.5),
                               thickness: 1.15,
                             ),
                           ),
                         ],
                       ),
-                      verticalSpace20,
-                      const LoginSocialButtons(),
                       verticalSpace30,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'Don\'t have an account?',
-                            style: TextStylesManager.regular14.copyWith(
-                              color: ColorsManager.primaryColor,
-                            ),
+                            style: TextStylesManager.regular14,
                           ),
                           TextButton(
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                            ),
+                            style: TextButton.styleFrom(padding: EdgeInsets.zero),
                             onPressed: () {
-                              context.push<Widget>(Routes.signUpRoute);
+                              context.push(Routes.signUpScreen);
                             },
                             child: Text(
                               'Sign Up',
